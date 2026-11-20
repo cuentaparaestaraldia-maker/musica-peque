@@ -53,9 +53,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const connectedDevices = midiDevices.filter(d => d.state === 'connected');
-  const hasMidi = connectedDevices.length > 0;
-  const midiDeviceName = hasMidi ? connectedDevices[0].name : null;
+  const hasMidi = midiDevices.length > 0;
+  const midiDeviceName = hasMidi ? midiDevices[0].name : null;
 
   return (
     <header className="app-navbar">

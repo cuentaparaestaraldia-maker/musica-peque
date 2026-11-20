@@ -142,32 +142,27 @@ export const App: React.FC = () => {
       handleUserNoteRelease(midi);
     });
 
-    // Desbloquear AudioContext y reconectar MIDI con cualquier interacción en pantalla
-    const handleUserGesture = () => {
+    // Desbloquear AudioContext en el primer clic del usuario
+    const unlockAudio = () => {
       synth.resume();
-      if (!midiManager.isConnected()) {
-        midiManager.init();
-      }
     };
-
-    window.addEventListener('pointerdown', handleUserGesture, { passive: true });
-    window.addEventListener('focus', handleUserGesture);
+    window.addEventListener('click', unlockAudio, { once: true });
 
     return () => {
       unsubDevices();
       unsubNoteOn();
       unsubNoteOff();
-      window.removeEventListener('pointerdown', handleUserGesture);
-      window.removeEventListener('focus', handleUserGesture);
+      window.removeEventListener('click', unlockAudio);
     };
   }, []);
 
   const handleManualMidiConnect = async () => {
     await synth.resume();
-    synth.playSuccessChime();
-    const res = await midiManager.reconnect();
-    const connected = res.devices.filter(d => d.state === 'connected');
-    if (connected.length === 0) {
+    const res = await midiManager.init();
+    if (res.devices.length > 0) {
+      synth.playSuccessChime();
+      setIsMidiDiagOpen(false);
+    } else {
       setIsMidiDiagOpen(true);
     }
   };
@@ -363,8 +358,7 @@ export const App: React.FC = () => {
     handleSelectSong(songs[nextIndex]);
   };
 
-  const connectedMidiDevices = midiDevices.filter(d => d.state === 'connected');
-  const hasConnectedMidi = connectedMidiDevices.length > 0;
+  const hasMidi = midiDevices.length > 0;
 
   return (
     <div className="musica-peque-app">
@@ -391,7 +385,7 @@ export const App: React.FC = () => {
       />
 
       {/* Banner de aviso y reconexión inmediata si el Casio no está conectado */}
-      {!hasConnectedMidi && (
+      {!hasMidi && (
         <div className="midi-reconnect-bar">
           <div className="reconnect-text-group">
             <span className="reconnect-pulse-dot" />
