@@ -10,6 +10,7 @@ class MidiManager {
   private onNoteOffListeners: Set<NoteOffCallback> = new Set();
   private onDevicesListeners: Set<DevicesCallback> = new Set();
   private isSupported: boolean = false;
+  private lastError: string | null = null;
 
   constructor() {
     this.isSupported = typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator;
@@ -19,24 +20,31 @@ class MidiManager {
     return this.isSupported;
   }
 
-  public async init(): Promise<boolean> {
+  public getLastError(): string | null {
+    return this.lastError;
+  }
+
+  public async init(): Promise<{ success: boolean; error?: string }> {
     if (!this.isSupported || !navigator.requestMIDIAccess) {
-      console.warn('Web MIDI API no está soportada en este navegador. Usa Chrome o Edge.');
-      return false;
+      this.lastError = 'Web MIDI API no soportada en este navegador.';
+      return { success: false, error: this.lastError };
     }
 
     try {
       this.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+      this.lastError = null;
       this.midiAccess.onstatechange = () => {
         this.notifyDeviceChange();
         this.bindInputs();
       };
       this.bindInputs();
       this.notifyDeviceChange();
-      return true;
-    } catch (err) {
-      console.error('Error al inicializar Web MIDI:', err);
-      return false;
+      return { success: true };
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      this.lastError = errorMsg;
+      console.warn('Aviso al solicitar Web MIDI (normal si falta interacción del usuario):', err);
+      return { success: false, error: errorMsg };
     }
   }
 

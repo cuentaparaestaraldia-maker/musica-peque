@@ -21,6 +21,8 @@ export const MidiDiagnosticModal: React.FC<MidiDiagnosticModalProps> = ({
   const [eventHistory, setEventHistory] = useState<string[]>([]);
   const isSupported = midiManager.checkSupport();
   const isSafari = typeof navigator !== 'undefined' && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isFirefox = typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
+  const lastError = midiManager.getLastError();
 
   useEffect(() => {
     if (lastMidiEvent) {
@@ -52,6 +54,8 @@ export const MidiDiagnosticModal: React.FC<MidiDiagnosticModalProps> = ({
             <div className="diag-step-header">
               {isSafari ? (
                 <AlertTriangle className="text-amber-400" size={22} />
+              ) : isFirefox ? (
+                <AlertTriangle className="text-amber-400" size={22} />
               ) : isSupported ? (
                 <CheckCircle2 className="text-emerald-400" size={22} />
               ) : (
@@ -63,13 +67,34 @@ export const MidiDiagnosticModal: React.FC<MidiDiagnosticModalProps> = ({
                   <p className="text-amber-300 font-semibold">
                     ⚠️ Estás usando Safari en tu Mac. Safari NO tiene soporte completo para Web MIDI. Por favor, abre este enlace en <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.
                   </p>
+                ) : isFirefox ? (
+                  <div>
+                    <p className="text-amber-300 font-semibold mb-2">
+                      🦊 Estás usando Mozilla Firefox.
+                    </p>
+                    <p className="text-slate-300 text-xs leading-relaxed mb-3">
+                      Firefox protege la privacidad y <strong>no permite</strong> conectar pianos MIDI en segundo plano. Requiere que hagas un clic explícito para mostrar su aviso de instalación de permiso (<em>"Site Permission Add-on"</em>).
+                    </p>
+                    <button
+                      type="button"
+                      className="action-btn scan-btn bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-4 rounded"
+                      onClick={onRetry}
+                    >
+                      👉 Pulsa aquí para activar el permiso en Firefox
+                    </button>
+                    {lastError && (
+                      <p className="text-rose-300 text-xs mt-2">
+                        Estado Firefox: {lastError}
+                      </p>
+                    )}
+                  </div>
                 ) : isSupported ? (
                   <p className="text-slate-300">
-                    Tu navegador soporta Web MIDI API correctamente.
+                    Tu navegador (Chrome / Edge) soporta Web MIDI API de forma nativa.
                   </p>
                 ) : (
                   <p className="text-rose-300">
-                    Este navegador no permite acceso MIDI. Usa Google Chrome o Microsoft Edge.
+                    Este navegador no permite acceso MIDI. Te recomendamos usar Google Chrome.
                   </p>
                 )}
               </div>
