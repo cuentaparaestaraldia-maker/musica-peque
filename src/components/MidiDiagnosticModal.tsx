@@ -22,7 +22,6 @@ export const MidiDiagnosticModal: React.FC<MidiDiagnosticModalProps> = ({
   const isSupported = midiManager.checkSupport();
   const isSafari = typeof navigator !== 'undefined' && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const isFirefox = typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
-  const lastError = midiManager.getLastError();
 
   useEffect(() => {
     if (lastMidiEvent) {
@@ -68,25 +67,16 @@ export const MidiDiagnosticModal: React.FC<MidiDiagnosticModalProps> = ({
                     ⚠️ Estás usando Safari en tu Mac. Safari NO tiene soporte completo para Web MIDI. Por favor, abre este enlace en <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.
                   </p>
                 ) : isFirefox ? (
-                  <div>
-                    <p className="text-amber-300 font-semibold mb-2">
-                      🦊 Estás usando Mozilla Firefox.
+                  <div className="bg-amber-950/40 border border-amber-500/30 p-3 rounded-lg">
+                    <p className="text-amber-300 font-bold mb-1">
+                      🦊 Firefox bloquea Web MIDI en webs de internet
                     </p>
                     <p className="text-slate-300 text-xs leading-relaxed mb-3">
-                      Firefox protege la privacidad y <strong>no permite</strong> conectar pianos MIDI en segundo plano. Requiere que hagas un clic explícito para mostrar su aviso de instalación de permiso (<em>"Site Permission Add-on"</em>).
+                      Por políticas de seguridad de Mozilla, Firefox exige un complemento exclusivo (<em>Site Permission Add-On</em>) y <strong>no muestra el diálogo de permiso</strong> en páginas web públicas como GitHub Pages.
                     </p>
-                    <button
-                      type="button"
-                      className="action-btn scan-btn bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-4 rounded"
-                      onClick={onRetry}
-                    >
-                      👉 Pulsa aquí para activar el permiso en Firefox
-                    </button>
-                    {lastError && (
-                      <p className="text-rose-300 text-xs mt-2">
-                        Estado Firefox: {lastError}
-                      </p>
-                    )}
+                    <div className="bg-sky-950/50 border border-sky-500/40 p-2.5 rounded text-sky-200 text-xs font-medium">
+                      💡 <strong>Solución:</strong> Abre esta misma página en <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong> en tu Mac. En ellos tu Casio Privia funcionará al instante sin configurar nada.
+                    </div>
                   </div>
                 ) : isSupported ? (
                   <p className="text-slate-300">
