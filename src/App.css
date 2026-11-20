@@ -991,3 +991,132 @@
 .next-btn {
   background: linear-gradient(135deg, #10B981, #047857);
 }
+
+/* 7. MODAL DE DIAGNÓSTICO MIDI */
+.midi-diag-modal {
+  max-width: 640px;
+}
+
+.diag-step-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.diag-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.diag-step-info {
+  flex: 1;
+}
+
+.diag-step-info h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #F8FAFC;
+  margin-bottom: 4px;
+}
+
+.diag-step-info p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.device-list {
+  list-style: none;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.device-item {
+  background: #0F172A;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+}
+
+.scan-btn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: #334155;
+}
+
+.scan-btn:hover {
+  background: #475569;
+}
+
+.midi-console {
+  background: #0B0F19;
+  border: 1px solid #1E293B;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.console-empty {
+  color: #64748B;
+  font-style: italic;
+}
+
+.console-line {
+  color: #4ADE80;
+  padding: 2px 0;
+}
+
+.console-indicator {
+  color: #38BDF8;
+  margin-right: 6px;
+}
+
+.mac-troubleshoot-guide {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.guide-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.guide-title h4 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #38BDF8;
+}
+
+.guide-list {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: #CBD5E1;
+  line-height: 1.5;
+}
+
+.guide-list code {
+  background: #0F172A;
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: #FACC15;
+}
+

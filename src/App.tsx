@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Song, AppSettings, MidiDeviceInfo } from './types/music';
 import { INITIAL_SONGS } from './config/songs';
-import { DEFAULT_SETTINGS, DEFAULT_NOTE_COLORS } from './config/musicConfig';
+import { DEFAULT_SETTINGS, DEFAULT_NOTE_COLORS, getNoteDetails } from './config/musicConfig';
 import { midiManager } from './audio/midi';
 import { synth } from './audio/synth';
 import './App.css';
@@ -13,6 +13,7 @@ import { StaffView } from './components/StaffView';
 import { SongSelector } from './components/SongSelector';
 import { SettingsModal } from './components/SettingsModal';
 import { Celebration } from './components/Celebration';
+import { MidiDiagnosticModal } from './components/MidiDiagnosticModal';
 
 const SETTINGS_STORAGE_KEY = 'musica_peque_settings_v1';
 const CUSTOM_SONGS_STORAGE_KEY = 'musica_peque_custom_songs_v1';
@@ -84,9 +85,11 @@ export const App: React.FC = () => {
   // Estado de modales
   const [isSongSelectorOpen, setIsSongSelectorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMidiDiagOpen, setIsMidiDiagOpen] = useState(false);
 
-  // Estado de dispositivos MIDI
+  // Estado de dispositivos MIDI y registro en vivo
   const [midiDevices, setMidiDevices] = useState<MidiDeviceInfo[]>([]);
+  const [lastMidiEvent, setLastMidiEvent] = useState<string | null>(null);
 
   // Referencias para el loop de animación
   const currentBeatRef = useRef<number>(0);
@@ -172,6 +175,10 @@ export const App: React.FC = () => {
   const handleUserNoteTrigger = useCallback((midi: number, velocity: number = 0.8) => {
     setActiveNotes(prev => new Set(prev).add(midi));
     synth.noteOn(midi, velocity);
+
+    const noteInfo = getNoteDetails(midi);
+    const nowStr = new Date().toLocaleTimeString();
+    setLastMidiEvent(`[${nowStr}] ${noteInfo.solfege} (${noteInfo.letter}${noteInfo.octave}, MIDI ${midi}) • Fuerza: ${(velocity * 100).toFixed(0)}%`);
 
     const song = currentSongRef.current;
     const beat = currentBeatRef.current;
@@ -341,7 +348,7 @@ export const App: React.FC = () => {
         settings={settings}
         onToggleStaff={() => handleUpdateSettings({ showStaff: !settings.showStaff })}
         midiDevices={midiDevices}
-        onRetryMidi={() => midiManager.init()}
+        onOpenMidiDiag={() => setIsMidiDiagOpen(true)}
       />
 
       {/* Área principal de juego */}
@@ -405,6 +412,15 @@ export const App: React.FC = () => {
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
+      />
+
+      {/* Modal de Diagnóstico MIDI */}
+      <MidiDiagnosticModal
+        isOpen={isMidiDiagOpen}
+        onClose={() => setIsMidiDiagOpen(false)}
+        devices={midiDevices}
+        onRetry={() => midiManager.init()}
+        lastMidiEvent={lastMidiEvent}
       />
     </div>
   );

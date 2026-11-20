@@ -12,7 +12,7 @@ interface NavbarProps {
   settings: AppSettings;
   onToggleStaff: () => void;
   midiDevices: MidiDeviceInfo[];
-  onRetryMidi: () => void;
+  onOpenMidiDiag: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   settings,
   onToggleStaff,
   midiDevices,
-  onRetryMidi,
+  onOpenMidiDiag,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -91,12 +91,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           className={`midi-status-badge ${hasMidi ? 'connected' : 'disconnected'}`}
-          onClick={onRetryMidi}
-          title={hasMidi ? `Conectado: ${midiDeviceName}` : 'Haz clic para reconectar MIDI USB'}
+          onClick={onOpenMidiDiag}
+          title={hasMidi ? `Conectado: ${midiDeviceName} (clic para ver diagnóstico)` : 'Haz clic para abrir diagnóstico y ayuda de conexión'}
         >
           <div className="status-dot" />
           <span className="status-text">
-            {hasMidi ? (midiDeviceName?.toLowerCase().includes('casio') ? 'Casio Privia' : midiDeviceName) : 'Conectar Piano MIDI'}
+            {hasMidi ? (midiDeviceName?.toLowerCase().includes('casio') ? 'Casio Privia' : midiDeviceName) : 'Diagnóstico MIDI'}
           </span>
         </button>
 
