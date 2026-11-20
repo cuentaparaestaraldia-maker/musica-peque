@@ -17,8 +17,23 @@ class PianoSynth {
       this.ctx = new AudioCtx();
     }
     if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
+  }
+
+  public async resume(): Promise<void> {
+    this.initContext();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {
+        console.warn('AudioContext resume warning:', e);
+      }
+    }
+  }
+
+  public isSuspended(): boolean {
+    return !this.ctx || this.ctx.state === 'suspended';
   }
 
   public setMuted(muted: boolean) {

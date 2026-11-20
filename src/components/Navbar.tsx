@@ -15,6 +15,7 @@ interface NavbarProps {
   onToggleStaff: () => void;
   midiDevices: MidiDeviceInfo[];
   onOpenMidiDiag: () => void;
+  onManualConnect?: () => void;
   activeGameTab: ActiveGameTab;
   onChangeGameTab: (tab: ActiveGameTab) => void;
 }
@@ -30,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleStaff,
   midiDevices,
   onOpenMidiDiag,
+  onManualConnect,
   activeGameTab,
   onChangeGameTab,
 }) => {
@@ -51,8 +53,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const hasMidi = midiDevices.length > 0;
-  const midiDeviceName = hasMidi ? midiDevices[0].name : null;
+  const connectedDevices = midiDevices.filter(d => d.state === 'connected');
+  const hasMidi = connectedDevices.length > 0;
+  const midiDeviceName = hasMidi ? connectedDevices[0].name : null;
 
   return (
     <header className="app-navbar">
@@ -145,12 +148,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           className={`midi-status-badge ${hasMidi ? 'connected' : 'disconnected'}`}
-          onClick={onOpenMidiDiag}
-          title={hasMidi ? `Conectado: ${midiDeviceName} (clic para ver diagnóstico)` : 'Haz clic para abrir diagnóstico y ayuda de conexión'}
+          onClick={hasMidi ? onOpenMidiDiag : (onManualConnect || onOpenMidiDiag)}
+          title={hasMidi ? `Conectado: ${midiDeviceName} (clic para ver diagnóstico)` : 'Haz clic para conectar / activar el teclado Casio Privia'}
         >
           <div className="status-dot" />
           <span className="status-text">
-            {hasMidi ? (midiDeviceName?.toLowerCase().includes('casio') ? 'Casio Privia' : midiDeviceName) : 'Diagnóstico MIDI'}
+            {hasMidi ? (midiDeviceName?.toLowerCase().includes('casio') ? 'Casio Privia' : midiDeviceName) : '🔌 Conectar Casio'}
           </span>
         </button>
 

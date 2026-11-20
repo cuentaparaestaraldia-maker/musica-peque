@@ -148,6 +148,78 @@
   box-shadow: 0 0 8px currentColor;
 }
 
+/* Barra de reconexión rápida para Casio Privia */
+.midi-reconnect-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), rgba(249, 115, 22, 0.2));
+  border-bottom: 1px solid rgba(249, 115, 22, 0.4);
+  padding: 8px 18px;
+  z-index: 40;
+}
+
+.reconnect-text-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reconnect-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  box-shadow: 0 0 10px #EF4444;
+  animation: pulseWarning 1.5s infinite;
+}
+
+.reconnect-title {
+  font-weight: 800;
+  color: #FEF08A;
+  font-size: 14px;
+}
+
+.reconnect-hint {
+  color: #E2E8F0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.reconnect-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F97316;
+  color: #FFFFFF;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.reconnect-action-btn:hover {
+  background: #EA580C;
+  transform: scale(1.03);
+}
+
+.reconnect-action-btn:active {
+  transform: scale(0.97);
+}
+
+@keyframes pulseWarning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
 .staff-toggle-btn {
   padding: 6px 12px;
   gap: 6px;

@@ -17,6 +17,7 @@ import { MidiDiagnosticModal } from './components/MidiDiagnosticModal';
 import { FindAnimalGame } from './components/games/FindAnimalGame';
 import { AnimalTrainGame } from './components/games/AnimalTrainGame';
 import { SimonAnimalsGame } from './components/games/SimonAnimalsGame';
+import { RefreshCw } from 'lucide-react';
 
 const SETTINGS_STORAGE_KEY = 'musica_peque_settings_v1';
 const CUSTOM_SONGS_STORAGE_KEY = 'musica_peque_custom_songs_v1';
@@ -126,7 +127,7 @@ export const App: React.FC = () => {
     });
   };
 
-  // Inicializar Web MIDI
+  // Inicializar Web MIDI y escuchar cambios
   useEffect(() => {
     midiManager.init();
     const unsubDevices = midiManager.onDevicesChange(devices => {
@@ -141,12 +142,35 @@ export const App: React.FC = () => {
       handleUserNoteRelease(midi);
     });
 
+    // Desbloquear AudioContext y reconectar MIDI con cualquier interacción en pantalla
+    const handleUserGesture = () => {
+      synth.resume();
+      if (!midiManager.isConnected()) {
+        midiManager.init();
+      }
+    };
+
+    window.addEventListener('pointerdown', handleUserGesture, { passive: true });
+    window.addEventListener('focus', handleUserGesture);
+
     return () => {
       unsubDevices();
       unsubNoteOn();
       unsubNoteOff();
+      window.removeEventListener('pointerdown', handleUserGesture);
+      window.removeEventListener('focus', handleUserGesture);
     };
   }, []);
+
+  const handleManualMidiConnect = async () => {
+    await synth.resume();
+    synth.playSuccessChime();
+    const res = await midiManager.reconnect();
+    const connected = res.devices.filter(d => d.state === 'connected');
+    if (connected.length === 0) {
+      setIsMidiDiagOpen(true);
+    }
+  };
 
   // Manejar teclado físico del ordenador (QWERTY)
   useEffect(() => {
@@ -339,6 +363,9 @@ export const App: React.FC = () => {
     handleSelectSong(songs[nextIndex]);
   };
 
+  const connectedMidiDevices = midiDevices.filter(d => d.state === 'connected');
+  const hasConnectedMidi = connectedMidiDevices.length > 0;
+
   return (
     <div className="musica-peque-app">
       {/* Barra de navegación superior */}
@@ -353,6 +380,7 @@ export const App: React.FC = () => {
         onToggleStaff={() => handleUpdateSettings({ showStaff: !settings.showStaff })}
         midiDevices={midiDevices}
         onOpenMidiDiag={() => setIsMidiDiagOpen(true)}
+        onManualConnect={handleManualMidiConnect}
         activeGameTab={activeGameTab}
         onChangeGameTab={(tab) => {
           setActiveGameTab(tab);
@@ -361,6 +389,25 @@ export const App: React.FC = () => {
           }
         }}
       />
+
+      {/* Banner de aviso y reconexión inmediata si el Casio no está conectado */}
+      {!hasConnectedMidi && (
+        <div className="midi-reconnect-bar">
+          <div className="reconnect-text-group">
+            <span className="reconnect-pulse-dot" />
+            <span className="reconnect-title">¿Tu Casio Privia no responde?</span>
+            <span className="reconnect-hint">Haz clic aquí para activar el permiso del piano y el audio en tu Mac</span>
+          </div>
+          <button
+            type="button"
+            className="reconnect-action-btn"
+            onClick={handleManualMidiConnect}
+          >
+            <RefreshCw size={17} className="spin-on-hover" />
+            <span>🔌 Conectar / Despertar Piano</span>
+          </button>
+        </div>
+      )}
 
       {/* Área principal de juego */}
       <main className="game-stage">
@@ -465,7 +512,7 @@ export const App: React.FC = () => {
         isOpen={isMidiDiagOpen}
         onClose={() => setIsMidiDiagOpen(false)}
         devices={midiDevices}
-        onRetry={() => midiManager.init()}
+        onRetry={handleManualMidiConnect}
         lastMidiEvent={lastMidiEvent}
       />
     </div>

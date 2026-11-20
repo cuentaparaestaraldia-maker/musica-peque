@@ -11,6 +11,7 @@ class MidiManager {
   private onDevicesListeners: Set<DevicesCallback> = new Set();
   private isSupported: boolean = false;
   private lastError: string | null = null;
+  private isInitializing: boolean = false;
 
   constructor() {
     this.isSupported = typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator;
@@ -24,34 +25,72 @@ class MidiManager {
     return this.lastError;
   }
 
-  public async init(): Promise<{ success: boolean; error?: string }> {
+  public isConnected(): boolean {
+    return this.getConnectedDevices().length > 0;
+  }
+
+  public async init(forceRefresh = false): Promise<{ success: boolean; error?: string; devices: MidiDeviceInfo[] }> {
     if (!this.isSupported || !navigator.requestMIDIAccess) {
       this.lastError = 'Web MIDI API no soportada en este navegador.';
-      return { success: false, error: this.lastError };
+      return { success: false, error: this.lastError, devices: [] };
     }
 
+    if (this.isInitializing) {
+      return { success: !!this.midiAccess, devices: this.getDevices() };
+    }
+
+    if (this.midiAccess && !forceRefresh) {
+      await this.bindInputs();
+      this.notifyDeviceChange();
+      return { success: true, devices: this.getDevices() };
+    }
+
+    this.isInitializing = true;
     try {
       this.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
       this.lastError = null;
-      this.midiAccess.onstatechange = () => {
-        this.notifyDeviceChange();
+
+      this.midiAccess.onstatechange = (e) => {
+        console.log('[Web MIDI] Estado cambiado en MIDIAccess:', e);
         this.bindInputs();
+        this.notifyDeviceChange();
       };
-      this.bindInputs();
+
+      await this.bindInputs();
       this.notifyDeviceChange();
-      return { success: true };
+      this.isInitializing = false;
+      return { success: true, devices: this.getDevices() };
     } catch (err: unknown) {
+      this.isInitializing = false;
       const errorMsg = err instanceof Error ? err.message : String(err);
       this.lastError = errorMsg;
       console.warn('Aviso al solicitar Web MIDI (normal si falta interacción del usuario):', err);
-      return { success: false, error: errorMsg };
+      return { success: false, error: errorMsg, devices: [] };
     }
   }
 
-  private bindInputs() {
+  public async reconnect(): Promise<{ success: boolean; error?: string; devices: MidiDeviceInfo[] }> {
+    this.midiAccess = null;
+    return this.init(true);
+  }
+
+  private async bindInputs() {
     if (!this.midiAccess) return;
 
     for (const input of this.midiAccess.inputs.values()) {
+      try {
+        if (input.state === 'connected' && input.connection !== 'open') {
+          await input.open();
+        }
+      } catch (err) {
+        console.warn('[Web MIDI] Aviso al abrir puerto de entrada:', input.name, err);
+      }
+
+      input.onstatechange = () => {
+        this.bindInputs();
+        this.notifyDeviceChange();
+      };
+
       input.onmidimessage = (event: MIDIMessageEvent) => {
         this.handleMidiMessage(event);
       };
@@ -64,6 +103,7 @@ class MidiManager {
     const noteNumber = event.data[1];
     const velocity = event.data[2] ?? 0;
     const command = statusByte >> 4;
+
     // 9 = Note On, 8 = Note Off
     if (command === 9) {
       if (velocity > 0) {
@@ -88,6 +128,10 @@ class MidiManager {
       });
     }
     return list;
+  }
+
+  public getConnectedDevices(): MidiDeviceInfo[] {
+    return this.getDevices().filter(d => d.state === 'connected');
   }
 
   private notifyDeviceChange() {
