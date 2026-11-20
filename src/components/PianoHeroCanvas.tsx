@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import type { Song, AppSettings, NoteEvent } from '../types/music';
 import { getNoteDetails } from '../config/musicConfig';
+import { getAnimalForMidi } from '../config/animalConfig';
 
 interface Particle {
   x: number;
@@ -190,19 +191,28 @@ export const PianoHeroCanvas: React.FC<PianoHeroCanvasProps> = ({
         ctx.strokeStyle = isCurrentTarget ? '#FFFFFF' : 'rgba(255, 255, 255, 0.5)';
         ctx.stroke();
 
-        // Etiqueta de la nota (Solfeo y Letra) en la parte inferior del bloque
-        if (showNoteNames && noteDurationPx >= 20) {
+        // Etiqueta de la nota con Animalito de la plantilla
+        if (showNoteNames && noteDurationPx >= 22) {
           ctx.shadowBlur = 0;
           ctx.fillStyle = '#FFFFFF';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
           
           const textY = bottomY - 14;
-          if (textY > topY + 6) {
-            ctx.fillText(details.solfege, noteX + noteW / 2, textY - 6);
-            ctx.font = '10px "Fredoka", "Nunito", sans-serif';
-            ctx.fillText(details.letter, noteX + noteW / 2, textY + 6);
+          if (textY > topY + 8) {
+            const animal = getAnimalForMidi(note.midi);
+            if (animal) {
+              ctx.font = '13px sans-serif';
+              ctx.fillText(animal.emoji, noteX + noteW / 2, textY - 7);
+              ctx.font = 'bold 9px "Fredoka", sans-serif';
+              ctx.fillText(`${animal.letter} • ${animal.solfege}`, noteX + noteW / 2, textY + 7);
+            } else {
+              const isTwoBlack = details.noteClass === 1 || details.noteClass === 3;
+              ctx.font = '12px sans-serif';
+              ctx.fillText(isTwoBlack ? '🏠' : '🔱', noteX + noteW / 2, textY - 6);
+              ctx.font = 'bold 8px "Fredoka", sans-serif';
+              ctx.fillText(details.letter, noteX + noteW / 2, textY + 6);
+            }
           }
         }
 

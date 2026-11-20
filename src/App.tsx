@@ -6,7 +6,7 @@ import { midiManager } from './audio/midi';
 import { synth } from './audio/synth';
 import './App.css';
 
-import { Navbar } from './components/Navbar';
+import { Navbar, type ActiveGameTab } from './components/Navbar';
 import { PianoHeroCanvas } from './components/PianoHeroCanvas';
 import { VirtualPiano } from './components/VirtualPiano';
 import { StaffView } from './components/StaffView';
@@ -14,6 +14,9 @@ import { SongSelector } from './components/SongSelector';
 import { SettingsModal } from './components/SettingsModal';
 import { Celebration } from './components/Celebration';
 import { MidiDiagnosticModal } from './components/MidiDiagnosticModal';
+import { FindAnimalGame } from './components/games/FindAnimalGame';
+import { AnimalTrainGame } from './components/games/AnimalTrainGame';
+import { SimonAnimalsGame } from './components/games/SimonAnimalsGame';
 
 const SETTINGS_STORAGE_KEY = 'musica_peque_settings_v1';
 const CUSTOM_SONGS_STORAGE_KEY = 'musica_peque_custom_songs_v1';
@@ -82,7 +85,8 @@ export const App: React.FC = () => {
   const [targetNotes, setTargetNotes] = useState<Set<number>>(new Set());
   const [isFinished, setIsFinished] = useState(false);
 
-  // Estado de modales
+  // Estado de modales y modo de juego
+  const [activeGameTab, setActiveGameTab] = useState<ActiveGameTab>('songs');
   const [isSongSelectorOpen, setIsSongSelectorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMidiDiagOpen, setIsMidiDiagOpen] = useState(false);
@@ -349,33 +353,75 @@ export const App: React.FC = () => {
         onToggleStaff={() => handleUpdateSettings({ showStaff: !settings.showStaff })}
         midiDevices={midiDevices}
         onOpenMidiDiag={() => setIsMidiDiagOpen(true)}
+        activeGameTab={activeGameTab}
+        onChangeGameTab={(tab) => {
+          setActiveGameTab(tab);
+          if (tab !== 'songs') {
+            setIsPlaying(false);
+          }
+        }}
       />
 
       {/* Área principal de juego */}
       <main className="game-stage">
-        {/* Pentagrama opcional */}
-        {settings.showStaff && (
-          <div className="staff-panel-wrapper">
-            <StaffView
-              song={currentSong}
-              settings={settings}
-              currentBeat={currentBeat}
+        {activeGameTab === 'songs' && (
+          <>
+            {/* Pentagrama opcional */}
+            {settings.showStaff && (
+              <div className="staff-panel-wrapper">
+                <StaffView
+                  song={currentSong}
+                  settings={settings}
+                  currentBeat={currentBeat}
+                />
+              </div>
+            )}
+
+            {/* Cascada de notas estilo Guitar Hero */}
+            <div className="waterfall-stage-wrapper">
+              <PianoHeroCanvas
+                song={currentSong}
+                settings={settings}
+                currentBeat={currentBeat}
+                isPlaying={isPlaying}
+                activeNotes={activeNotes}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Minijuego 1: ¿Dónde vive el animalito? */}
+        {activeGameTab === 'find-animal' && (
+          <div className="mini-game-stage-wrapper">
+            <FindAnimalGame
+              activeNotes={activeNotes}
+              onNoteTriggered={(midi) => handleUserNoteTrigger(midi, 0.8)}
+              onExit={() => setActiveGameTab('songs')}
             />
           </div>
         )}
 
-        {/* Cascada de notas estilo Guitar Hero */}
-        <div className="waterfall-stage-wrapper">
-          <PianoHeroCanvas
-            song={currentSong}
-            settings={settings}
-            currentBeat={currentBeat}
-            isPlaying={isPlaying}
-            activeNotes={activeNotes}
-          />
-        </div>
+        {/* Minijuego 2: El Tren de las Escalas */}
+        {activeGameTab === 'train' && (
+          <div className="mini-game-stage-wrapper">
+            <AnimalTrainGame
+              activeNotes={activeNotes}
+              onExit={() => setActiveGameTab('songs')}
+            />
+          </div>
+        )}
 
-        {/* Teclado de piano visual con pegatinas y nombres de notas */}
+        {/* Minijuego 3: El Eco de los Animales */}
+        {activeGameTab === 'simon' && (
+          <div className="mini-game-stage-wrapper">
+            <SimonAnimalsGame
+              activeNotes={activeNotes}
+              onExit={() => setActiveGameTab('songs')}
+            />
+          </div>
+        )}
+
+        {/* Teclado de piano visual con pegatinas y nombres de notas (Siempre visible) */}
         <div className="piano-stage-wrapper">
           <VirtualPiano
             settings={settings}

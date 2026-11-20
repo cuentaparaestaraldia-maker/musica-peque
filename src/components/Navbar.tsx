@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { Song, MidiDeviceInfo, AppSettings } from '../types/music';
 import { Play, Pause, RotateCcw, Settings, Maximize, Minimize, Music2 } from 'lucide-react';
 
+export type ActiveGameTab = 'songs' | 'find-animal' | 'train' | 'simon';
+
 interface NavbarProps {
   currentSong: Song;
   isPlaying: boolean;
@@ -13,6 +15,8 @@ interface NavbarProps {
   onToggleStaff: () => void;
   midiDevices: MidiDeviceInfo[];
   onOpenMidiDiag: () => void;
+  activeGameTab: ActiveGameTab;
+  onChangeGameTab: (tab: ActiveGameTab) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,6 +30,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleStaff,
   midiDevices,
   onOpenMidiDiag,
+  activeGameTab,
+  onChangeGameTab,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -50,40 +56,88 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="app-navbar">
-      {/* Botón de selección de canción infantil */}
-      <button
-        type="button"
-        className="song-picker-btn"
-        onClick={onOpenSongSelector}
-        title="Elegir otra canción"
-      >
-        <span className="current-song-emoji">{currentSong.emoji}</span>
-        <div className="current-song-titles">
-          <span className="current-song-name">{currentSong.title}</span>
-          <span className="change-song-hint">Cambiar canción ▼</span>
-        </div>
-      </button>
-
-      {/* Controles de reproducción principales */}
-      <div className="nav-controls">
+      {/* Selector de Minijuegos Infantiles con Animalitos */}
+      <div className="game-tabs-selector">
         <button
           type="button"
-          className="nav-btn restart-btn"
-          onClick={onRestartSong}
-          title="Empezar desde el principio"
+          className={`game-nav-tab ${activeGameTab === 'songs' ? 'active' : ''}`}
+          onClick={() => onChangeGameTab('songs')}
         >
-          <RotateCcw size={22} />
+          <span className="tab-icon">🎵</span>
+          <span className="tab-text">Canciones</span>
         </button>
-
         <button
           type="button"
-          className={`nav-btn play-pause-btn ${isPlaying ? 'playing' : 'paused'}`}
-          onClick={onTogglePlay}
-          title={isPlaying ? 'Pausa' : 'Tocar'}
+          className={`game-nav-tab ${activeGameTab === 'find-animal' ? 'active' : ''}`}
+          onClick={() => onChangeGameTab('find-animal')}
         >
-          {isPlaying ? <Pause size={28} /> : <Play size={28} className="translate-x-0.5" />}
+          <span className="tab-icon">🐶</span>
+          <span className="tab-text">Buscar Animal</span>
+        </button>
+        <button
+          type="button"
+          className={`game-nav-tab ${activeGameTab === 'train' ? 'active' : ''}`}
+          onClick={() => onChangeGameTab('train')}
+        >
+          <span className="tab-icon">🚂</span>
+          <span className="tab-text">El Tren</span>
+        </button>
+        <button
+          type="button"
+          className={`game-nav-tab ${activeGameTab === 'simon' ? 'active' : ''}`}
+          onClick={() => onChangeGameTab('simon')}
+        >
+          <span className="tab-icon">🎯</span>
+          <span className="tab-text">El Eco</span>
         </button>
       </div>
+
+      {/* Si estamos en modo canciones, mostrar botón de canción y controles */}
+      {activeGameTab === 'songs' ? (
+        <>
+          <button
+            type="button"
+            className="song-picker-btn"
+            onClick={onOpenSongSelector}
+            title="Elegir otra canción"
+          >
+            <span className="current-song-emoji">{currentSong.emoji}</span>
+            <div className="current-song-titles">
+              <span className="current-song-name">{currentSong.title}</span>
+              <span className="change-song-hint">Cambiar canción ▼</span>
+            </div>
+          </button>
+
+          <div className="nav-controls">
+            <button
+              type="button"
+              className="nav-btn restart-btn"
+              onClick={onRestartSong}
+              title="Empezar desde el principio"
+            >
+              <RotateCcw size={22} />
+            </button>
+
+            <button
+              type="button"
+              className={`nav-btn play-pause-btn ${isPlaying ? 'playing' : 'paused'}`}
+              onClick={onTogglePlay}
+              title={isPlaying ? 'Pausa' : 'Tocar'}
+            >
+              {isPlaying ? <Pause size={28} /> : <Play size={28} className="translate-x-0.5" />}
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="game-mode-banner-info">
+          <span className="info-sparkle">✨</span>
+          <span className="info-title">
+            {activeGameTab === 'find-animal' && 'Modo: ¿Dónde vive el Animalito?'}
+            {activeGameTab === 'train' && 'Modo: El Tren de las Escalas (Do-Re-Mi...)'}
+            {activeGameTab === 'simon' && 'Modo: El Eco de los Animales (Memoria)'}
+          </span>
+        </div>
+      )}
 
       {/* Indicador de estado MIDI y accesos rápidos */}
       <div className="nav-actions">

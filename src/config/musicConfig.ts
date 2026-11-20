@@ -16,20 +16,20 @@ export const NOTE_NAMES = [
   { letter: 'B', solfege: 'Si', isBlack: false },
 ];
 
-// Paleta arcoíris estándar de pegatinas infantiles (Chroma-Notes / Boomwhackers)
+// Paleta exacta de las pegatinas del usuario (DOG, RABBIT, MONKEY, FROG, GIRAFFE, LION, BEAR)
 export const DEFAULT_NOTE_COLORS: NoteColorConfig = {
-  0: '#EF4444',  // C / Do: Rojo vivo
-  1: '#DC2626',  // C#
-  2: '#F97316',  // D / Re: Naranja
-  3: '#EA580C',  // D#
-  4: '#FACC15',  // E / Mi: Amarillo
-  5: '#22C55E',  // F / Fa: Verde
-  6: '#16A34A',  // F#
-  7: '#06B6D4',  // G / Sol: Cian / Azul celeste
-  8: '#0284C7',  // G#
-  9: '#6366F1',  // A / La: Azul / Índigo
-  10: '#4F46E5', // A#
-  11: '#EC4899', // B / Si: Magenta / Rosa
+  0: '#EF4444',  // C / Do: DOG (Rojo)
+  1: '#B91C1C',  // C# (Casa 🏠)
+  2: '#F97316',  // D / Re: RABBIT (Naranja)
+  3: '#C2410C',  // D# (Casa 🏠)
+  4: '#EAB308',  // E / Mi: MONKEY (Amarillo)
+  5: '#10B981',  // F / Fa: FROG (Verde)
+  6: '#059669',  // F# (Tenedor 🔱)
+  7: '#0EA5E9',  // G / Sol: GIRAFFE (Celeste)
+  8: '#0284C7',  // G# (Tenedor 🔱)
+  9: '#6366F1',  // A / La: LION (Añil / Azul)
+  10: '#4338CA', // A# (Tenedor 🔱)
+  11: '#A855F7', // B / Si: BEAR (Morado)
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {

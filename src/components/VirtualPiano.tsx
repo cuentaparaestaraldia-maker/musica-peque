@@ -1,6 +1,7 @@
 import React from 'react';
 import type { AppSettings } from '../types/music';
 import { getNoteDetails } from '../config/musicConfig';
+import { getAnimalForMidi, getBlackKeyInfo } from '../config/animalConfig';
 
 interface VirtualPianoProps {
   settings: AppSettings;
@@ -17,7 +18,7 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
   onNotePress,
   onNoteRelease,
 }) => {
-  const { keyRangeStart, keyRangeEnd, noteColors, showNoteNames } = settings;
+  const { keyRangeStart, keyRangeEnd, noteColors } = settings;
 
   // Generar lista de teclas en el rango
   const keys: ReturnType<typeof getNoteDetails>[] = [];
@@ -36,6 +37,7 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
             const isActive = activeNotes.has(k.midi);
             const isTarget = targetNotes.has(k.midi);
             const color = noteColors[k.noteClass] || '#CBD5E1';
+            const animal = getAnimalForMidi(k.midi);
 
             return (
               <button
@@ -60,18 +62,20 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
                 {/* Resplandor al tocar */}
                 {isActive && <div className="key-active-glow" style={{ backgroundColor: color }} />}
 
-                {/* Pegatina en la tecla */}
+                {/* Pegatina idéntica a la plantilla física */}
                 <div
-                  className="sticker-badge"
+                  className="sticker-card-badge"
                   style={{
-                    backgroundColor: color,
+                    borderColor: color,
                     boxShadow: isTarget ? `0 0 16px ${color}` : undefined,
                   }}
                 >
-                  {showNoteNames && (
-                    <div className="sticker-labels">
-                      <span className="sticker-solfege">{k.solfege}</span>
-                      <span className="sticker-letter">{k.letter}</span>
+                  {animal && (
+                    <div className="sticker-content">
+                      <span className="sticker-emoji">{animal.emoji}</span>
+                      <span className="sticker-animal-name" style={{ color }}>{animal.name}</span>
+                      <span className="sticker-sublabel">{animal.letter} • {animal.solfege}</span>
+                      <div className="sticker-color-dot" style={{ backgroundColor: color }} />
                     </div>
                   )}
                 </div>
@@ -85,7 +89,6 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
           {keys.map((k, index) => {
             if (!k.isBlack) return null;
 
-            // Calcular posición relativa respecto a las teclas blancas
             // Contamos cuántas teclas blancas hay antes de esta
             const whiteKeysBefore = keys.slice(0, index).filter(item => !item.isBlack).length;
             const totalWhite = whiteKeys.length;
@@ -94,7 +97,8 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
 
             const isActive = activeNotes.has(k.midi);
             const isTarget = targetNotes.has(k.midi);
-            const color = noteColors[k.noteClass] || '#64748B';
+            const blackInfo = getBlackKeyInfo(k.midi);
+            const isHouse = blackInfo?.type === 'house';
 
             return (
               <button
@@ -104,7 +108,7 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
                 style={{
                   left: `${leftPercent}%`,
                   width: `${widthPercent}%`,
-                  '--key-accent-color': color,
+                  '--key-accent-color': isHouse ? '#FACC15' : '#38BDF8',
                 } as React.CSSProperties}
                 onMouseDown={() => onNotePress?.(k.midi)}
                 onMouseUp={() => onNoteRelease?.(k.midi)}
@@ -118,18 +122,19 @@ export const VirtualPiano: React.FC<VirtualPianoProps> = ({
                   onNoteRelease?.(k.midi);
                 }}
               >
-                {/* Píldora de pegatina en tecla negra */}
-                <div
-                  className="black-sticker-badge"
-                  style={{
-                    backgroundColor: color,
-                    boxShadow: isTarget ? `0 0 14px ${color}` : undefined,
-                  }}
-                >
-                  {showNoteNames && (
-                    <span className="black-sticker-label">{k.letter}</span>
-                  )}
-                </div>
+                {/* Pegatina de Casita (Grupo 2) o Tenedor (Grupo 3) */}
+                {blackInfo && (
+                  <div
+                    className={`black-sticker-badge ${isHouse ? 'border-yellow' : 'border-cyan'}`}
+                    style={{
+                      boxShadow: isTarget ? `0 0 14px ${isHouse ? '#FACC15' : '#38BDF8'}` : undefined,
+                    }}
+                  >
+                    <span className="black-emoji">{blackInfo.emoji}</span>
+                    <span className="black-name">{blackInfo.name}</span>
+                    <span className="black-notes">{blackInfo.label}</span>
+                  </div>
+                )}
               </button>
             );
           })}
