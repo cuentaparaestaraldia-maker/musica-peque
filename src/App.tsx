@@ -81,6 +81,7 @@ export const App: React.FC = () => {
 
   // Estado de reproducción y juego
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDemoPlaying, setIsDemoPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [activeNotes, setActiveNotes] = useState<Set<number>>(new Set());
   const [targetNotes, setTargetNotes] = useState<Set<number>>(new Set());
@@ -99,14 +100,18 @@ export const App: React.FC = () => {
   // Referencias para el loop de animación
   const currentBeatRef = useRef<number>(0);
   const isPlayingRef = useRef<boolean>(false);
+  const isDemoPlayingRef = useRef<boolean>(false);
   const currentSongRef = useRef<Song>(currentSong);
   const settingsRef = useRef<AppSettings>(settings);
   const playedNotesSetRef = useRef<Set<string>>(new Set());
+  const demoTriggeredNotesRef = useRef<Set<string>>(new Set());
+  const demoActiveNotesRef = useRef<Map<string, number>>(new Map());
   const lastTimeRef = useRef<number | null>(null);
 
   // Sincronizar referencias
   currentBeatRef.current = currentBeat;
   isPlayingRef.current = isPlaying;
+  isDemoPlayingRef.current = isDemoPlaying;
   currentSongRef.current = currentSong;
   settingsRef.current = settings;
 
@@ -245,6 +250,16 @@ export const App: React.FC = () => {
     synth.noteOff(midi);
   }, []);
 
+  const stopDemo = useCallback(() => {
+    demoActiveNotesRef.current.forEach(midi => {
+      synth.noteOff(midi);
+    });
+    demoActiveNotesRef.current.clear();
+    demoTriggeredNotesRef.current.clear();
+    setActiveNotes(new Set());
+    setIsDemoPlaying(false);
+  }, []);
+
   // Bucle de animación y tiempo de la canción
   useEffect(() => {
     let animId: number;
@@ -262,7 +277,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      const deltaSec = (now - lastTimeRef.current) / 1000;
+      const deltaSec = Math.min(0.1, (now - lastTimeRef.current) / 1000);
       lastTimeRef.current = now;
 
       const song = currentSongRef.current;
@@ -275,6 +290,59 @@ export const App: React.FC = () => {
       });
 
       let nextBeat = currentBeatRef.current;
+
+      if (isDemoPlayingRef.current) {
+        // Modo Escuchar Modelo: reproducción continua con audio y teclas iluminadas
+        const beatsPerSec = (song.tempo / 60) * speed;
+        nextBeat += deltaSec * beatsPerSec;
+
+        let activeChanged = false;
+        const notesToPlay = song.notes;
+
+        for (const n of notesToPlay) {
+          if (!demoTriggeredNotesRef.current.has(n.id) && nextBeat >= n.time) {
+            demoTriggeredNotesRef.current.add(n.id);
+            demoActiveNotesRef.current.set(n.id, n.midi);
+            synth.noteOn(n.midi, n.hand === 'left' ? 0.45 : 0.85);
+            activeChanged = true;
+          }
+
+          const releaseBeat = n.time + Math.max(0.25, n.duration * 0.9);
+          if (demoActiveNotesRef.current.has(n.id) && nextBeat >= releaseBeat) {
+            demoActiveNotesRef.current.delete(n.id);
+            // Solo apagar si otra nota demo no está sosteniendo el mismo MIDI
+            const stillHeld = Array.from(demoActiveNotesRef.current.values()).includes(n.midi);
+            if (!stillHeld) {
+              synth.noteOff(n.midi);
+            }
+            activeChanged = true;
+          }
+        }
+
+        if (activeChanged) {
+          setActiveNotes(new Set(demoActiveNotesRef.current.values()));
+        }
+
+        const currentActive = visibleNotes.filter(
+          n => Math.abs(n.time - nextBeat) < 0.25
+        );
+        setTargetNotes(new Set(currentActive.map(n => n.midi)));
+
+        currentBeatRef.current = nextBeat;
+        setCurrentBeat(nextBeat);
+
+        const lastAnyNote = song.notes[song.notes.length - 1];
+        if (lastAnyNote && nextBeat > lastAnyNote.time + lastAnyNote.duration + 1.0) {
+          stopDemo();
+          setIsPlaying(false);
+          currentBeatRef.current = 0;
+          setCurrentBeat(0);
+          setTargetNotes(new Set());
+        }
+
+        animId = requestAnimationFrame(tick);
+        return;
+      }
 
       // Comprobar si hay una nota en wait mode esperando
       if (mode === 'wait') {
@@ -320,14 +388,63 @@ export const App: React.FC = () => {
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [stopDemo]);
 
   // Control de transporte
   const handleTogglePlay = () => {
+    if (isDemoPlaying) {
+      stopDemo();
+      currentBeatRef.current = 0;
+      setCurrentBeat(0);
+      playedNotesSetRef.current.clear();
+      setIsPlaying(true);
+      return;
+    }
     setIsPlaying(p => !p);
   };
 
+  const handleToggleDemo = async () => {
+    await synth.resume();
+    if (isDemoPlaying) {
+      stopDemo();
+      setIsPlaying(false);
+      currentBeatRef.current = 0;
+      setCurrentBeat(0);
+      setTargetNotes(new Set());
+      return;
+    }
+    stopDemo();
+    currentBeatRef.current = 0;
+    setCurrentBeat(0);
+    playedNotesSetRef.current.clear();
+    currentSong.notes.forEach(n => {
+      n.played = false;
+    });
+    setTargetNotes(new Set());
+    setIsFinished(false);
+    setIsDemoPlaying(true);
+    setIsPlaying(true);
+  };
+
+  const handleListenDemoSong = async (song: Song) => {
+    await synth.resume();
+    stopDemo();
+    setCurrentSong(song);
+    currentBeatRef.current = 0;
+    setCurrentBeat(0);
+    playedNotesSetRef.current.clear();
+    song.notes.forEach(n => {
+      n.played = false;
+    });
+    setTargetNotes(new Set());
+    setIsFinished(false);
+    setActiveGameTab('songs');
+    setIsDemoPlaying(true);
+    setIsPlaying(true);
+  };
+
   const handleRestartSong = () => {
+    stopDemo();
     currentBeatRef.current = 0;
     setCurrentBeat(0);
     playedNotesSetRef.current.clear();
@@ -340,6 +457,7 @@ export const App: React.FC = () => {
   };
 
   const handleSelectSong = (song: Song) => {
+    stopDemo();
     setCurrentSong(song);
     currentBeatRef.current = 0;
     setCurrentBeat(0);
@@ -366,7 +484,9 @@ export const App: React.FC = () => {
       <Navbar
         currentSong={currentSong}
         isPlaying={isPlaying}
+        isDemoPlaying={isDemoPlaying}
         onTogglePlay={handleTogglePlay}
+        onToggleDemo={handleToggleDemo}
         onRestartSong={handleRestartSong}
         onOpenSongSelector={() => setIsSongSelectorOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -379,6 +499,7 @@ export const App: React.FC = () => {
         onChangeGameTab={(tab) => {
           setActiveGameTab(tab);
           if (tab !== 'songs') {
+            stopDemo();
             setIsPlaying(false);
           }
         }}
@@ -490,6 +611,7 @@ export const App: React.FC = () => {
         songs={songs}
         currentSongId={currentSong.id}
         onSelectSong={handleSelectSong}
+        onListenDemo={handleListenDemoSong}
         onAddSong={handleAddSong}
       />
 

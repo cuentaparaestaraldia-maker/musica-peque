@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import type { Song, MidiDeviceInfo, AppSettings } from '../types/music';
-import { Play, Pause, RotateCcw, Settings, Maximize, Minimize, Music2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings, Maximize, Minimize, Music2, Volume2, Square } from 'lucide-react';
 
 export type ActiveGameTab = 'songs' | 'find-animal' | 'train' | 'simon';
 
 interface NavbarProps {
   currentSong: Song;
   isPlaying: boolean;
+  isDemoPlaying: boolean;
   onTogglePlay: () => void;
+  onToggleDemo: () => void;
   onRestartSong: () => void;
   onOpenSongSelector: () => void;
   onOpenSettings: () => void;
@@ -23,7 +25,9 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentSong,
   isPlaying,
+  isDemoPlaying,
   onTogglePlay,
+  onToggleDemo,
   onRestartSong,
   onOpenSongSelector,
   onOpenSettings,
@@ -113,6 +117,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="nav-controls">
             <button
               type="button"
+              className={`nav-btn demo-listen-btn ${isDemoPlaying ? 'active' : ''}`}
+              onClick={onToggleDemo}
+              title={isDemoPlaying ? 'Parar modelo' : 'Escuchar la canción completa como modelo'}
+            >
+              {isDemoPlaying ? <Square size={18} /> : <Volume2 size={20} />}
+              <span className="btn-label">{isDemoPlaying ? 'Parar Modelo' : 'Escuchar Modelo'}</span>
+            </button>
+
+            <button
+              type="button"
               className="nav-btn restart-btn"
               onClick={onRestartSong}
               title="Empezar desde el principio"
@@ -122,11 +136,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              className={`nav-btn play-pause-btn ${isPlaying ? 'playing' : 'paused'}`}
+              className={`nav-btn play-pause-btn ${isPlaying && !isDemoPlaying ? 'playing' : 'paused'}`}
               onClick={onTogglePlay}
-              title={isPlaying ? 'Pausa' : 'Tocar'}
+              title={isPlaying && !isDemoPlaying ? 'Pausa' : 'Tocar'}
             >
-              {isPlaying ? <Pause size={28} /> : <Play size={28} className="translate-x-0.5" />}
+              {isPlaying && !isDemoPlaying ? <Pause size={28} /> : <Play size={28} className="translate-x-0.5" />}
             </button>
           </div>
         </>

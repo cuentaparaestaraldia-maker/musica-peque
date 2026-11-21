@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import type { Song } from '../types/music';
 import { parseMidiFile, buildSongFromSimpleScore } from '../utils/midiParser';
-import { Music, Upload, Plus, X, Check } from 'lucide-react';
+import { Music, Upload, Plus, X, Check, Volume2 } from 'lucide-react';
 
 interface SongSelectorProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface SongSelectorProps {
   songs: Song[];
   currentSongId: string;
   onSelectSong: (song: Song) => void;
+  onListenDemo?: (song: Song) => void;
   onAddSong: (song: Song) => void;
 }
 
@@ -18,6 +19,7 @@ export const SongSelector: React.FC<SongSelectorProps> = ({
   songs,
   currentSongId,
   onSelectSong,
+  onListenDemo,
   onAddSong,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -103,13 +105,20 @@ export const SongSelector: React.FC<SongSelectorProps> = ({
               {songs.map(song => {
                 const isSelected = song.id === currentSongId;
                 return (
-                  <button
+                  <div
                     key={song.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={`song-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => {
                       onSelectSong(song);
                       onClose();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        onSelectSong(song);
+                        onClose();
+                      }
                     }}
                   >
                     <div className="song-emoji">{song.emoji}</div>
@@ -124,9 +133,24 @@ export const SongSelector: React.FC<SongSelectorProps> = ({
                       <div className="song-meta">
                         <span className="meta-badge">{song.notes.length} notas</span>
                         <span className="meta-badge">{song.tempo} BPM</span>
+                        {onListenDemo && (
+                          <button
+                            type="button"
+                            className="song-listen-pill"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onListenDemo(song);
+                              onClose();
+                            }}
+                            title="Escuchar la canción completa como modelo"
+                          >
+                            <Volume2 size={13} />
+                            <span>Escuchar</span>
+                          </button>
+                        )}
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

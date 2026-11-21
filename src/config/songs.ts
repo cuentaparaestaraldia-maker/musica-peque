@@ -19,7 +19,7 @@ export const INITIAL_SONGS: Song[] = [
     80,
     'C4:1 D4:1 E4:1 F4:1 G4:1 G4:1 G4:2 A4:1 A4:1 A4:1 A4:1 G4:2 G4:2 F4:1 F4:1 F4:1 F4:1 E4:2 E4:2 D4:1 D4:1 D4:1 D4:1 C4:2 C4:2',
     'C3:2 G3:2 C3:2 C3:2 F3:2 F3:2 C3:2 C3:2 G3:2 G3:2 C3:2 C3:2 G3:2 G3:2 C3:2 C3:2',
-    'Pio, pio, pio... una escala divertida paso a paso'
+    'Pío, pío, pío... una escala divertida paso a paso'
   ),
 
   buildSongFromSimpleScore(
@@ -80,5 +80,85 @@ export const INITIAL_SONGS: Song[] = [
     'G4:1 E4:1 G4:1 E4:1 G4:1 G4:1 E4:2 G4:1 E4:1 G4:1 E4:1 G4:1 G4:1 E4:2 A4:1 A4:1 G4:1 G4:1 F4:1 F4:1 E4:2 D4:1 D4:1 C4:2',
     'C3:2 C3:2 C3:2 C3:2 C3:2 C3:2 C3:2 C3:2 F3:2 C3:2 G3:2 C3:2',
     'Cucú cantaba la rana debajo del agua'
+  ),
+
+  buildSongFromSimpleScore(
+    'debajo-boton',
+    'Debajo de un Botón',
+    '🔘',
+    86,
+    'C4:1 E4:1 G4:1 G4:1 A4:1 G4:1 E4:2 F4:1 F4:1 D4:1 D4:1 E4:1 C4:1 G4:2 C4:1 E4:1 G4:1 G4:1 A4:1 G4:1 E4:2 F4:1 D4:1 E4:1 C4:1 D4:1 B3:1 C4:2',
+    'C3:2 C3:2 F3:2 C3:2 G3:2 G3:2 C3:2 G3:2 C3:2 C3:2 F3:2 C3:2 G3:2 G3:2 C3:2',
+    'Que encontró Martín, ¡tin, tin, tin!'
+  ),
+
+  buildSongFromSimpleScore(
+    'susanita-raton',
+    'Susanita Tiene un Ratón',
+    '🐭',
+    90,
+    'G4:1 E4:1 E4:1 E4:1 F4:1 D4:1 D4:2 G4:1 F4:1 E4:1 D4:1 E4:1 C4:1 C4:2 G4:1 E4:1 E4:1 E4:1 F4:1 D4:1 D4:2 G4:1 F4:1 E4:1 D4:1 C4:2',
+    'C3:2 C3:2 G3:2 G3:2 G3:2 G3:2 C3:2 C3:2 C3:2 C3:2 G3:2 G3:2 G3:2 C3:2',
+    'Un ratón chiquitín que come chocolate y turrón'
+  ),
+
+  buildSongFromSimpleScore(
+    'patio-mi-casa',
+    'El Patio de Mi Casa',
+    '🏡',
+    84,
+    'C4:1 E4:1 G4:1 G4:1 G4:1 A4:1 G4:2 F4:1 D4:1 F4:1 F4:1 E4:1 C4:1 E4:2 C4:1 E4:1 G4:1 G4:1 G4:1 A4:1 G4:2 F4:1 E4:1 D4:1 D4:1 C4:2',
+    'C3:2 C3:2 C3:2 C3:2 G3:2 G3:2 C3:2 C3:2 C3:2 C3:2 C3:2 C3:2 G3:2 C3:2',
+    'Cuando llueve se moja como los demás'
+  ),
+
+  buildSongFromSimpleScore(
+    'vaca-lechera',
+    'Tengo una Vaca Lechera',
+    '🥛',
+    88,
+    'C4:1 E4:1 G4:1 G4:1 E4:1 G4:1 A4:2 G4:1 F4:1 E4:1 D4:1 C4:1 D4:1 E4:2 C4:1 E4:1 G4:1 G4:1 E4:1 G4:1 A4:2 G4:1 F4:1 E4:1 D4:1 C4:2',
+    'C3:2 C3:2 C3:2 F3:2 C3:2 G3:2 C3:2 C3:2 C3:2 C3:2 C3:2 F3:2 G3:2 C3:2',
+    '¡Tolón, tolón! No es una vaca cualquiera'
+  ),
+
+  buildSongFromSimpleScore(
+    'pin-pon',
+    'Pin Pon es un Muñeco',
+    '🧼',
+    84,
+    'C4:1 E4:1 G4:1 G4:1 A4:1 G4:1 E4:2 F4:1 F4:1 F4:1 E4:1 D4:1 D4:1 C4:2 C4:1 E4:1 G4:1 G4:1 A4:1 G4:1 E4:2 F4:1 D4:1 E4:1 C4:1 D4:1 B3:1 C4:2',
+    'C3:2 C3:2 F3:2 C3:2 F3:2 G3:2 C3:2 C3:2 C3:2 C3:2 F3:2 C3:2 G3:2 C3:2',
+    'Muy guapo y de cartón, se lava la carita'
+  ),
+
+  buildSongFromSimpleScore(
+    'a-mi-burro',
+    'A Mi Burro le Duele la Cabeza',
+    '🐴',
+    82,
+    'C4:1 D4:1 E4:1 C4:1 E4:1 F4:1 G4:2 A4:1 G4:1 F4:1 E4:1 D4:1 F4:1 E4:2 C4:1 D4:1 E4:1 C4:1 E4:1 F4:1 G4:2 A4:1 G4:1 F4:1 D4:1 C4:2',
+    'C3:2 C3:2 C3:2 G3:2 F3:2 G3:2 C3:2 C3:2 C3:2 C3:2 G3:2 G3:2 C3:2',
+    'El médico le ha puesto una gorrita negra'
+  ),
+
+  buildSongFromSimpleScore(
+    'barquito-chiquitito',
+    'El Barquito Chiquitito',
+    '⛵',
+    80,
+    'C4:1 D4:1 E4:1 E4:1 F4:1 E4:1 D4:2 D4:1 E4:1 F4:1 F4:1 G4:1 F4:1 E4:2 C4:1 E4:1 G4:1 G4:1 A4:1 G4:1 F4:2 E4:1 D4:1 E4:1 C4:1 D4:1 B3:1 C4:2',
+    'C3:2 C3:2 G3:2 G3:2 G3:2 G3:2 C3:2 C3:2 C3:2 F3:2 C3:2 G3:2 C3:2',
+    'Había una vez un barco chiquitito que no podía navegar'
+  ),
+
+  buildSongFromSimpleScore(
+    'jingle-bells',
+    'Navidad (Jingle Bells)',
+    '🎄',
+    92,
+    'E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4 F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2 E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:0.5 E4:4 F4:1 F4:1 F4:1.5 F4:0.5 F4:1 E4:1 E4:1 E4:0.5 E4:0.5 G4:1 G4:1 F4:1 D4:1 C4:4',
+    'C3:2 C3:2 C3:2 C3:2 C3:2 G3:2 C3:2 C3:2 F3:2 F3:2 C3:2 C3:2 G3:2 G3:2 G3:2 G3:2 C3:2 C3:2 C3:2 C3:2 C3:2 G3:2 C3:2 C3:2 F3:2 F3:2 C3:2 C3:2 G3:2 G3:2 C3:4',
+    '¡Super fácil! Casi toda la melodía con 3-5 teclas'
   ),
 ];
