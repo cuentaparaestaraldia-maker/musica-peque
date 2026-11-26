@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   showNoteNames: true,
   noteColors: { ...DEFAULT_NOTE_COLORS },
   keyRangeStart: 48,        // C3 (Do3)
-  keyRangeEnd: 72,          // C5 (Do5) - 2 octavas centradas para teclas grandes
+  keyRangeEnd: 74,          // D5 (Re5) - Incluye hasta Re5 para canciones como Cucú, cucú y Sur le pont d'Avignon
 };
 
 export function getNoteDetails(midi: number) {

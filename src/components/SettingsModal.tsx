@@ -165,14 +165,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="choice-pills">
                   <button
                     type="button"
-                    className={`choice-pill ${settings.keyRangeEnd - settings.keyRangeStart <= 24 ? 'active' : ''}`}
-                    onClick={() => onUpdateSettings({ keyRangeStart: 48, keyRangeEnd: 72 })}
+                    className={`choice-pill ${settings.keyRangeEnd - settings.keyRangeStart <= 26 ? 'active' : ''}`}
+                    onClick={() => onUpdateSettings({ keyRangeStart: 48, keyRangeEnd: 74 })}
                   >
-                    2 Octavas (Teclas Grandes C3-C5)
+                    2 Octavas (Teclas Grandes C3-D5)
                   </button>
                   <button
                     type="button"
-                    className={`choice-pill ${settings.keyRangeEnd - settings.keyRangeStart > 24 ? 'active' : ''}`}
+                    className={`choice-pill ${settings.keyRangeEnd - settings.keyRangeStart > 26 ? 'active' : ''}`}
                     onClick={() => onUpdateSettings({ keyRangeStart: 48, keyRangeEnd: 84 })}
                   >
                     3 Octavas (C3-C6)

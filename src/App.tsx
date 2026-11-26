@@ -38,6 +38,8 @@ const QWERTY_NOTE_MAP: Record<string, number> = {
   u: 70, // La# / A#
   j: 71, // Si / B
   k: 72, // Do5 / C5
+  o: 73, // Do#5 / C#5
+  l: 74, // Re5 / D5
 };
 
 export const App: React.FC = () => {
@@ -64,6 +66,7 @@ export const App: React.FC = () => {
         return {
           ...DEFAULT_SETTINGS,
           ...parsed,
+          keyRangeEnd: Math.max(74, parsed.keyRangeEnd || DEFAULT_SETTINGS.keyRangeEnd),
           noteColors: { ...DEFAULT_NOTE_COLORS, ...(parsed.noteColors || {}) },
         };
       }
@@ -344,17 +347,20 @@ export const App: React.FC = () => {
         return;
       }
 
-      // Comprobar si hay una nota en wait mode esperando
+      // Comprobar si hay notas en wait mode esperando
       if (mode === 'wait') {
-        // Encontrar la nota pendiente más antigua
-        const pendingNote = visibleNotes.find(
+        // Encontrar la primera nota pendiente en o antes del beat actual
+        const firstPending = visibleNotes.find(
           n => !playedNotesSetRef.current.has(n.id) && n.time <= nextBeat + 0.05
         );
 
-        if (pendingNote) {
-          // Congelar el beat exactamente en pendingNote.time hasta que se toque
-          nextBeat = pendingNote.time;
-          setTargetNotes(new Set([pendingNote.midi]));
+        if (firstPending) {
+          // Congelar el beat exactamente en firstPending.time hasta que se toquen todas las notas de ese instante
+          nextBeat = firstPending.time;
+          const chordPending = visibleNotes.filter(
+            n => !playedNotesSetRef.current.has(n.id) && Math.abs(n.time - firstPending.time) < 0.05
+          );
+          setTargetNotes(new Set(chordPending.map(n => n.midi)));
         } else {
           // Avanzar normalmente
           const beatsPerSec = (song.tempo / 60) * speed;
